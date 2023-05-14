@@ -26,9 +26,9 @@ fn solution(s : impl AsRef<str>) -> i32
 fn one_letter(cleaned_s : &str) -> i32
 {
     cleaned_s.chars()
+        .take_while(|c| c.is_ascii_digit())
         .last()
-        .map(|c| if c.is_ascii_digit() { c as i32 - 48 } else { DEFAULT })
-        .unwrap_or(DEFAULT)
+        .map_or(DEFAULT, |c| c as i32 - 48)
 }
 
 #[inline]
@@ -66,21 +66,25 @@ fn three_or_more_letters(cleaned_s : &str) -> i32
         .unwrap_or(if is_negative { i32::MIN } else { i32::MAX })
 }
 
-// Not mine.
+// Not mine (optimized).
 #[inline]
-pub fn my_atoi(s : impl AsRef<str>) -> i32 {
+pub fn my_atoi(s : impl AsRef<str>) -> i32
+{
     let s = s.as_ref().trim_start();
-    let (s, sign) = match s.strip_prefix('-') {
-        Some(s) => (s, -1),
-        None => (s.strip_prefix('+').unwrap_or(s), 1),
-    };
+    
+    let first_char = s.get(0..1).and_then(|one| one.chars().last());
+    if !matches!(first_char, Some('-') | Some('+') | Some('0'..='9'))
+    { return  DEFAULT }
+    
+    let (s, sign) =
+        match s.strip_prefix('-')
+        {
+            Some(s) => (s, -1),
+            None => (s.strip_prefix('+').unwrap_or(s), 1),
+        };
     s.chars()
-        .map(|c| c.to_digit(10))
-        .take_while(Option::is_some)
-        .flatten()
-        .fold(0, |acc, digit| {
-            acc.saturating_mul(10).saturating_add(sign * digit as i32)
-        })
+        .map_while(|c| c.to_digit(10))
+        .fold(0, |acc, digit| acc.saturating_mul(10).saturating_add(sign * digit as i32))
 }
 
 
@@ -93,9 +97,10 @@ mod tests
     #[test]
     fn solution_test()
     {
+        let (min, max) = (i32::MIN, i32::MAX);
         assert_eq!(solution(" -42"), -42);
-        assert_eq!(solution("   +78957958465465_hiugougo"), i32::MAX);
-        assert_eq!(solution("   -78957958465465_hiugougo"), i32::MIN);
+        assert_eq!(solution("   +78957958465465_hiugougo"), max);
+        assert_eq!(solution("   -78957958465465_hiugougo"), min);
         assert_eq!(solution("   jh + 78957958465465_hiugougo"), 0);
         assert_eq!(solution("   jh - 78957958465465_hiugougo"), 0);
         assert_eq!(solution("    + 78957958465465_hiugougo"), 0);
@@ -116,14 +121,16 @@ mod tests
         assert_eq!(solution("8"), 8);
         assert_eq!(solution("9"), 9);
         assert_eq!(solution("8l"), 8);
+        assert_eq!(solution("           -869765436578966786467535424315325465487607698656321 lokcrtssrt"), min);
     }
     
     #[test]
     fn not_my_solution_test()
     {
+        let (min, max) = (i32::MIN, i32::MAX);
         assert_eq!(my_atoi(" -42"), -42);
-        assert_eq!(my_atoi("   +78957958465465_hiugougo"), i32::MAX);
-        assert_eq!(my_atoi("   -78957958465465_hiugougo"), i32::MIN);
+        assert_eq!(my_atoi("   +78957958465465_hiugougo"), max);
+        assert_eq!(my_atoi("   -78957958465465_hiugougo"), min);
         assert_eq!(my_atoi("   jh + 78957958465465_hiugougo"), 0);
         assert_eq!(my_atoi("   jh - 78957958465465_hiugougo"), 0);
         assert_eq!(my_atoi("    + 78957958465465_hiugougo"), 0);
@@ -144,6 +151,7 @@ mod tests
         assert_eq!(my_atoi("8"), 8);
         assert_eq!(my_atoi("9"), 9);
         assert_eq!(my_atoi("8l"), 8);
+        assert_eq!(my_atoi("           -869765436578966786467535424315325465487607698656321 lokcrtssrt"), min);
     }
     
     #[test]
