@@ -12,7 +12,7 @@ pub mod benchmarking
     }
     
     #[inline]
-    pub fn bench_times<F: FnMut()>(iterations : u32, mut f : F) -> Option<Duration> // where F: FnOnce
+    pub fn bench_times<F : FnMut()>(iterations : u32, mut f : F) -> Option<Duration> // where F: FnOnce
     {
         let cap = iterations.try_into().unwrap_or(0);
         let mut vec = Vec::with_capacity(cap);
