@@ -39,7 +39,7 @@ fn two_letter(cleaned_s : &str) -> i32
         (Some('-'), Some(two @ '0'..='9')) => -(two as i32 - 48),
         (Some('+'), Some(two @ '0'..='9')) => two as i32 - 48,
         (Some(one @ '0'..='9'), Some(two @ '0'..='9')) => (one as i32 - 48) * 10 + (two as i32 - 48),
-        (Some(one@ '0'..='9'), ..) => one as i32 - 48,
+        (Some(one @ '0'..='9'), ..) => one as i32 - 48,
         _ => DEFAULT
     }
 }
@@ -74,7 +74,7 @@ pub fn my_atoi(s : impl AsRef<str>) -> i32
     
     let first_char = s.get(0..1).and_then(|one| one.chars().last());
     if !matches!(first_char, Some('-') | Some('+') | Some('0'..='9'))
-    { return  DEFAULT }
+    { return DEFAULT }
     
     let (s, sign) =
         match s.strip_prefix('-')
