@@ -4,7 +4,9 @@ pub mod benchmarking
     use std::time::{Duration, Instant};
     
     #[inline]
-    pub fn bench_once<F : FnOnce()>(f : F) -> Duration // where F: FnOnce
+    pub fn bench_once<F, T>(f : F) -> Duration
+        where
+            F : FnOnce() -> T
     {
         let instant = Instant::now();
         f();
@@ -12,7 +14,9 @@ pub mod benchmarking
     }
     
     #[inline]
-    pub fn bench_times<F : FnMut()>(iterations : u32, mut f : F) -> Option<Duration> // where F: FnOnce
+    pub fn bench_times<F, T>(iterations : u32, mut f : F) -> Option<Duration>
+        where
+            F : FnMut() -> T
     {
         let cap = iterations.try_into().unwrap_or(0);
         let mut vec = Vec::with_capacity(cap);
